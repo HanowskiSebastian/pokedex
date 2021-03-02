@@ -1,26 +1,33 @@
-import { createRouter, createWebHashHistory } from "vue-router";
-import Home from "../views/Home.vue";
+import { createRouter, createWebHistory } from "vue-router";
 
-const routes = [
-  {
-    path: "/",
-    name: "Home",
-    component: Home
-  },
-  {
-    path: "/about",
-    name: "About",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/About.vue")
-  }
-];
+import Pokedex from "../views/Pokedex";
+import PokemonDetails from "../components/pokedex/PokemonDetails";
+
+import store from "../store/index";
 
 const router = createRouter({
-  history: createWebHashHistory(),
-  routes
+  history: createWebHistory(),
+  routes: [
+    { path: "/", redirect: "/pokedex" },
+    {
+      path: "/pokedex",
+      component: Pokedex,
+      children: [
+        {
+          path: ":id",
+          name: "active-pokemon",
+          components: { pokemonDetails: PokemonDetails },
+        },
+      ],
+    },
+  ],
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.fullPath === "/pokedex") {
+    store.dispatch("clearPokedex");
+  }
+  next();
 });
 
 export default router;
